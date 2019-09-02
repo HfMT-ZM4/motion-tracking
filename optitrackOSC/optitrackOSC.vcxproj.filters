@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\osc99">
+      <UniqueIdentifier>{e463697c-4b06-4416-913a-74b5dc4dd44d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="optitrackOSC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscAddress.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscBundle.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscCommon.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscError.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscMessage.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscPacket.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSC99\Osc99\OscSlip.c">
+      <Filter>Source Files\osc99</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
