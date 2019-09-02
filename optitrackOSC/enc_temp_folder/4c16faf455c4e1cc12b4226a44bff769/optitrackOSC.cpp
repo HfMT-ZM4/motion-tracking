@@ -82,10 +82,8 @@ int main(int argc, char* argv[])
 		return -1; // error: unable to create an OSC packet from the OSC contents
 	}
 
-	/*
 	for( int i = 0; i < oscPacket.size; i++)
 		printf("%c\n", oscPacket.contents[i]);
-	*/
 
 	/*
 	// Encode SLIP packet
