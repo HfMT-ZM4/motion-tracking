@@ -1,8 +1,8 @@
 requires:
-Motive installed
+OptiTrack Motive 
 
 and the libraries:
-NatNetSDK
-HfMT-ZM4/OSC99
+* NatNetSDK
+* HfMT-ZM4/OSC99
 
 installed in the root dev folder (GitHub if using the desktop app)
