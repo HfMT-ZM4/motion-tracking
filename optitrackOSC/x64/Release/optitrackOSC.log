@@ -1,15 +1,1 @@
-﻿  optitrackOSC.cpp
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(577,33): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(587,34): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(594,32): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(852,5): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(878,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(865,7): warning C4101:  'message': unreferenced local variable
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(864,7): warning C4101:  'buf': unreferenced local variable
-  Generating code
-  2 of 70 functions ( 2.9%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Release\optitrackOSC.exe
-  0 File(s) copied
+﻿

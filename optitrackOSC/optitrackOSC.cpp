@@ -32,6 +32,7 @@ Usage [optional]:
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <NatNetTypes.h>
 #include <NatNetCAPI.h>
@@ -47,7 +48,6 @@ Usage [optional]:
 // send to defs
 
 #define SENDTOADDR "192.168.178.36"	// address to send to
-#define BUFLEN 512	
 #define PORT 8888	
 
 // prototypes
@@ -76,6 +76,7 @@ sServerDescription g_serverDescription;
 #define M_PI 3.14159265358979323846264338327950288
 #endif
 
+std::unordered_map<int, std::string> g_rigidBodyNames, g_markerNames;
 
 // --
 
@@ -139,12 +140,21 @@ int main(int argc, char* argv[])
 	printf("\n\n[SampleClient] Requesting Data Descriptions...");
 	sDataDescriptions* pDataDefs = NULL;
 	iResult = g_pClient->GetDataDescriptionList(&pDataDefs);
+
 	if (iResult != ErrorCode_OK || pDataDefs == NULL)
 	{
 		printf("[SampleClient] Unable to retrieve Data Descriptions.");
 	}
 	else
 	{
+		OscBundle bndl;
+		OscMessage m_x, m_y, m_z, m_id, m_name;
+		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/name");
+		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/id");
+		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/x");
+		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/x");
+
+
 		printf("[SampleClient] Received %d Data Descriptions:\n", pDataDefs->nDataDescriptions);
 		for (int i = 0; i < pDataDefs->nDataDescriptions; i++)
 		{
@@ -166,6 +176,8 @@ int main(int argc, char* argv[])
 				printf("RigidBody ID : %d\n", pRB->ID);
 				printf("RigidBody Parent ID : %d\n", pRB->parentID);
 				printf("Parent Offset : %3.2f,%3.2f,%3.2f\n", pRB->offsetx, pRB->offsety, pRB->offsetz);
+
+				g_rigidBodyNames[pRB->ID] = pRB->szName;
 
 				if (pRB->MarkerPositions != NULL && pRB->MarkerRequiredLabels != NULL)
 				{
@@ -539,7 +551,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageAddInt32(&msg, data->nRigidBodies);
 	OscBundleAddContents(&bndl, &msg);
 
-	OscMessage m_x, m_y, m_z, m_qx, m_qy, m_qz, m_qw, m_roll, m_pitch, m_yaw, m_id, m_valid, m_meanError;
+	OscMessage m_x, m_y, m_z, m_qx, m_qy, m_qz, m_qw, m_roll, m_pitch, m_yaw, m_id, m_valid, m_meanError, m_name;
 	OscMessageInitialise(&m_x, "/rigidBody/x");
 	OscMessageInitialise(&m_y, "/rigidBody/y");
 	OscMessageInitialise(&m_z, "/rigidBody/z");
@@ -551,8 +563,10 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageInitialise(&m_pitch, "/rigidBody/pitch");
 	OscMessageInitialise(&m_roll, "/rigidBody/roll");
 	OscMessageInitialise(&m_id, "/rigidBody/id");
+	OscMessageInitialise(&m_name, "/rigidBody/name");
 	OscMessageInitialise(&m_valid, "/rigidBody/validTracking");
 	OscMessageInitialise(&m_meanError, "/rigidBody/meanError");
+
 	
 	std::string str_addr;
 
@@ -594,6 +608,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddFloat32(&m_yaw, yaw);
 
 		OscMessageAddInt32(&m_id, _rb.ID);
+		OscMessageAddString(&m_name, g_rigidBodyNames[_rb.ID].c_str() );
 
 		OscMessageAddFloat32(&m_meanError, _rb.MeanError);
 
@@ -615,7 +630,8 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			data->RigidBodies[i].qw);
 		*/
 	}
-
+	OscBundleAddContents(&bndl, &m_id);
+	OscBundleAddContents(&bndl, &m_name);
 	OscBundleAddContents(&bndl, &m_x);
 	OscBundleAddContents(&bndl, &m_y);
 	OscBundleAddContents(&bndl, &m_z);
@@ -626,7 +642,6 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscBundleAddContents(&bndl, &m_yaw);
 	OscBundleAddContents(&bndl, &m_pitch);
 	OscBundleAddContents(&bndl, &m_roll);
-	OscBundleAddContents(&bndl, &m_id);
 	OscBundleAddContents(&bndl, &m_valid);
 	OscBundleAddContents(&bndl, &m_meanError);
 
@@ -688,7 +703,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		bActiveMarker = ((marker.params & 0x20) != 0);
 
 		int modelID, markerID;
+
 		NatNet_DecodeID(marker.ID, &modelID, &markerID);
+		//printf("%i %i\n", modelID, markerID);
 
 		OscMessageAddBool(&m_active, bActiveMarker);
 		OscMessageAddBool(&m_labeled , !bUnlabeled);
@@ -849,20 +866,21 @@ bool sendOSC(const void* osc)
 		return 0; // error: unable to create an OSC packet from the OSC contents
 	}
 
-	if (send(g_socket, oscPacket.contents, oscPacket.size, 0) == SOCKET_ERROR)
+	int sent = send(g_socket, oscPacket.contents, oscPacket.size, 0);
+	//printf("sent %i, size %i\n", sent, oscPacket.size);
+	if (sent == SOCKET_ERROR)
 	{
 		printf(" sendto() failed with error code : % d ", WSAGetLastError());
 		exit(EXIT_FAILURE);
 	}
+
+
 	return 1;
 }
 
 
 void setupSocket()
 {
-	int slen = sizeof(g_sendToAddr);
-	char buf[BUFLEN];
-	char message[BUFLEN];
 	WSADATA wsa;
 
 	//Initialise winsock
@@ -887,14 +905,38 @@ void setupSocket()
 	g_sendToAddr.sin_port = htons(PORT);
 	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(SENDTOADDR);
 
+
+
+	BOOL bOptVal = FALSE;
+	int bOptLen = sizeof(BOOL);
+
+	int iOptVal = 0;
+	int iOptLen = sizeof(int);
+
+	int iResult = getsockopt(g_socket, SOL_SOCKET, SO_SNDBUF, (char*)& iOptVal, &iOptLen);
+	if (iResult == SOCKET_ERROR)
+		printf("Error getsockopt one");
+	else
+		printf("send buffer size = %d\n", iOptVal);
+
+	int new_size = 512000;
+	setsockopt(g_socket, SOL_SOCKET, SO_SNDBUF, (char*)& new_size, sizeof(new_size));
+	iResult = getsockopt(g_socket, SOL_SOCKET, SO_SNDBUF, (char*)& iOptVal, &iOptLen);
+	if (iResult == SOCKET_ERROR)
+		printf("Error getsockopt two");
+	else
+		printf("send buffer size = %d\n", iOptVal);
+
+
 	//----------------------
 // Connect to server.
-	int iResult = connect(g_socket, (SOCKADDR*)& g_sendToAddr, sizeof(g_sendToAddr));
+	iResult = connect(g_socket, (SOCKADDR*)& g_sendToAddr, sizeof(g_sendToAddr));
 	if (iResult == SOCKET_ERROR) {
-		wprintf(L"connect failed with error: %d\n", WSAGetLastError());
+		printf("connect failed with error: %d\n", WSAGetLastError());
 		closesocket(g_socket);
 		WSACleanup();
 		return;
 	}
+
 
 }
