@@ -46,6 +46,8 @@ Usage [optional]:
 #define BUFLEN 512	
 #define PORT 8888	
 
+#define M_PI 3.14159265358979323846264338327950288
+
 #ifndef _WIN32
 char getch();
 #endif
@@ -667,30 +669,62 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	{
 		str_addr = "/rigidBody/" + std::to_string(i);
 
+		sRigidBodyData& _rb = data->RigidBodies[i];
+
 		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str() );
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].x);
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].y);
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].z);
+		OscMessageAddFloat32(&msg, _rb.x);
+		OscMessageAddFloat32(&msg, _rb.y);
+		OscMessageAddFloat32(&msg, _rb.z);
 		OscBundleAddContents(&bndl, &msg);
 
 		OscMessageInitialise(&msg, (str_addr + "/quat").c_str() );
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].qx);
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].qy);
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].qz);
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].qw);
+		OscMessageAddFloat32(&msg, _rb.qx);
+		OscMessageAddFloat32(&msg, _rb.qy);
+		OscMessageAddFloat32(&msg, _rb.qz);
+		OscMessageAddFloat32(&msg, _rb.qw);
+		OscBundleAddContents(&bndl, &msg);
+
+		// roll (x-axis rotation)
+		double sinr_cosp = +2.0 * (_rb.qw * _rb.qx + _rb.qy * _rb.qz);
+		double cosr_cosp = +1.0 - 2.0 * (_rb.qx * _rb.qx + _rb.qy * _rb.qy);
+		double roll = atan2(sinr_cosp, cosr_cosp);
+
+		OscMessageInitialise(&msg, (str_addr + "/euler/roll").c_str());
+		OscMessageAddFloat32(&msg, roll);
+		OscBundleAddContents(&bndl, &msg);
+
+		// pitch (y-axis rotation)
+		double sinp = +2.0 * (_rb.qw * _rb.qy - _rb.qz * _rb.qx);
+		double pitch;
+		if (fabs(sinp) >= 1)
+			pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+		else
+			pitch = asin(sinp);
+
+		OscMessageInitialise(&msg, (str_addr + "/euler/pitch").c_str());
+		OscMessageAddFloat32(&msg, pitch);
+		OscBundleAddContents(&bndl, &msg);
+
+		// yaw (z-axis rotation)
+		double siny_cosp = +2.0 * (_rb.qw * _rb.qz + _rb.qx * _rb.qy);
+		double cosy_cosp = +1.0 - 2.0 * (_rb.qy * _rb.qy + _rb.qz * _rb.qz);
+		double yaw = atan2(siny_cosp, cosy_cosp);
+
+		OscMessageInitialise(&msg, (str_addr + "/euler/yaw").c_str());
+		OscMessageAddFloat32(&msg, yaw);
 		OscBundleAddContents(&bndl, &msg);
 
 		OscMessageInitialise(&msg, (str_addr + "/id").c_str() );
-		OscMessageAddInt32(&msg, data->RigidBodies[i].ID);
+		OscMessageAddInt32(&msg, _rb.ID);
 		OscBundleAddContents(&bndl, &msg);
 
 		OscMessageInitialise(&msg, (str_addr + "/meanError").c_str());
-		OscMessageAddFloat32(&msg, data->RigidBodies[i].MeanError);
+		OscMessageAddFloat32(&msg, _rb.MeanError);
 		OscBundleAddContents(&bndl, &msg);
 
 		// params
 		// 0x01 : bool, rigid body was successfully tracked in this frame
-		bool bTrackingValid = data->RigidBodies[i].params & 0x01;
+		bool bTrackingValid = _rb.params & 0x01;
 
 		OscMessageInitialise(&msg, (str_addr + "/validTracking").c_str());
 		OscMessageAddBool(&msg, bTrackingValid );

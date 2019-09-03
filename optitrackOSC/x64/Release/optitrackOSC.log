@@ -1,4 +1,12 @@
-﻿  optitrackOSC.cpp
+﻿  OscAddress.c
+  OscBundle.c
+  OscCommon.c
+  OscError.c
+  OscMessage.c
+  OscPacket.c
+  OscSlip.c
+C:\Users\innolab\Documents\GitHub\OSC99\Osc99\OscMessage.c(1043,49): warning C4018:  '<': signed/unsigned mismatch
+  optitrackOSC.cpp
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(85,4): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(110,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(97,7): warning C4101:  'message': unreferenced local variable
@@ -6,5 +14,10 @@ C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(693,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(705,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(714,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-  optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Debug\optitrackOSC.exe
-  0 File(s) copied
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 175 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Release\optitrackOSC.exe
+  C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\..\..\NatNetSDK\lib\x64\NatNetLib.dll
+  1 File(s) copied
