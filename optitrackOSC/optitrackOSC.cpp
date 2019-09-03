@@ -663,35 +663,42 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageAddInt32(&msg, data->nRigidBodies);
 	OscBundleAddContents(&bndl, &msg);
 
+	OscMessage m_x, m_y, m_z, m_qx, m_qy, m_qz, m_qw, m_roll, m_pitch, m_yaw, m_id, m_valid, m_meanError;
+	OscMessageInitialise(&m_x, "/rigidBody/x");
+	OscMessageInitialise(&m_y, "/rigidBody/y");
+	OscMessageInitialise(&m_z, "/rigidBody/z");
+	OscMessageInitialise(&m_qx, "/rigidBody/qx");
+	OscMessageInitialise(&m_qy, "/rigidBody/qy");
+	OscMessageInitialise(&m_qz, "/rigidBody/qz");
+	OscMessageInitialise(&m_qw, "/rigidBody/qw");
+	OscMessageInitialise(&m_yaw, "/rigidBody/yaw");
+	OscMessageInitialise(&m_pitch, "/rigidBody/pitch");
+	OscMessageInitialise(&m_roll, "/rigidBody/roll");
+	OscMessageInitialise(&m_id, "/rigidBody/id");
+	OscMessageInitialise(&m_valid, "/rigidBody/validTracking");
+	OscMessageInitialise(&m_meanError, "/rigidBody/meanError");
+	
 	std::string str_addr;
 
 	for (i = 0; i < data->nRigidBodies; i++)
 	{
-		str_addr = "/rigidBody/" + std::to_string(i);
-
 		sRigidBodyData& _rb = data->RigidBodies[i];
 
-		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str() );
-		OscMessageAddFloat32(&msg, _rb.x);
-		OscMessageAddFloat32(&msg, _rb.y);
-		OscMessageAddFloat32(&msg, _rb.z);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_x, _rb.x);
+		OscMessageAddFloat32(&m_y, _rb.y);
+		OscMessageAddFloat32(&m_z, _rb.z);
 
-		OscMessageInitialise(&msg, (str_addr + "/quat").c_str() );
-		OscMessageAddFloat32(&msg, _rb.qx);
-		OscMessageAddFloat32(&msg, _rb.qy);
-		OscMessageAddFloat32(&msg, _rb.qz);
-		OscMessageAddFloat32(&msg, _rb.qw);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_qx, _rb.qx);
+		OscMessageAddFloat32(&m_qy, _rb.qy);
+		OscMessageAddFloat32(&m_qz, _rb.qz);
+		OscMessageAddFloat32(&m_qw, _rb.qw);
 
 		// roll (x-axis rotation)
 		double sinr_cosp = +2.0 * (_rb.qw * _rb.qx + _rb.qy * _rb.qz);
 		double cosr_cosp = +1.0 - 2.0 * (_rb.qx * _rb.qx + _rb.qy * _rb.qy);
 		double roll = atan2(sinr_cosp, cosr_cosp);
 
-		OscMessageInitialise(&msg, (str_addr + "/euler/roll").c_str());
-		OscMessageAddFloat32(&msg, roll);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_roll, roll);
 
 		// pitch (y-axis rotation)
 		double sinp = +2.0 * (_rb.qw * _rb.qy - _rb.qz * _rb.qx);
@@ -701,34 +708,23 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		else
 			pitch = asin(sinp);
 
-		OscMessageInitialise(&msg, (str_addr + "/euler/pitch").c_str());
-		OscMessageAddFloat32(&msg, pitch);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_pitch, pitch);
 
 		// yaw (z-axis rotation)
 		double siny_cosp = +2.0 * (_rb.qw * _rb.qz + _rb.qx * _rb.qy);
 		double cosy_cosp = +1.0 - 2.0 * (_rb.qy * _rb.qy + _rb.qz * _rb.qz);
 		double yaw = atan2(siny_cosp, cosy_cosp);
 
-		OscMessageInitialise(&msg, (str_addr + "/euler/yaw").c_str());
-		OscMessageAddFloat32(&msg, yaw);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_yaw, yaw);
 
-		OscMessageInitialise(&msg, (str_addr + "/id").c_str() );
-		OscMessageAddInt32(&msg, _rb.ID);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddInt32(&m_id, _rb.ID);
 
-		OscMessageInitialise(&msg, (str_addr + "/meanError").c_str());
-		OscMessageAddFloat32(&msg, _rb.MeanError);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_meanError, _rb.MeanError);
 
 		// params
 		// 0x01 : bool, rigid body was successfully tracked in this frame
 		bool bTrackingValid = _rb.params & 0x01;
-
-		OscMessageInitialise(&msg, (str_addr + "/validTracking").c_str());
-		OscMessageAddBool(&msg, bTrackingValid );
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddBool(&m_valid, bTrackingValid );
 
 		/*
 		printf("Rigid Body [ID=%d  Error=%3.2f  Valid=%d]\n", data->RigidBodies[i].ID, data->RigidBodies[i].MeanError, bTrackingValid);
@@ -743,6 +739,20 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			data->RigidBodies[i].qw);
 		*/
 	}
+
+	OscBundleAddContents(&bndl, &m_x);
+	OscBundleAddContents(&bndl, &m_y);
+	OscBundleAddContents(&bndl, &m_z);
+	OscBundleAddContents(&bndl, &m_qx);
+	OscBundleAddContents(&bndl, &m_qy);
+	OscBundleAddContents(&bndl, &m_qz);
+	OscBundleAddContents(&bndl, &m_qw);
+	OscBundleAddContents(&bndl, &m_yaw);
+	OscBundleAddContents(&bndl, &m_pitch);
+	OscBundleAddContents(&bndl, &m_roll);
+	OscBundleAddContents(&bndl, &m_id);
+	OscBundleAddContents(&bndl, &m_valid);
+	OscBundleAddContents(&bndl, &m_meanError);
 
 	// Skeletons
 	//printf("Skeletons [Count=%d]\n", data->nSkeletons);
@@ -775,23 +785,32 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageAddInt32(&msg, data->nLabeledMarkers);
 	OscBundleAddContents(&bndl, &msg);
 
-	OscMessageInitialise(&msg, "/otherMarker/count");
-	OscMessageAddInt32(&msg, data->nOtherMarkers);
-	OscBundleAddContents(&bndl, &msg);
+	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size;
+	OscMessageInitialise(&m_x, "/marker/x");
+	OscMessageInitialise(&m_y, "/marker/y");
+	OscMessageInitialise(&m_z, "/marker/z");
+
+	OscMessageInitialise(&m_labeled, "/marker/labeled");
+	OscMessageInitialise(&m_active, "/marker/active");
+	OscMessageInitialise(&m_occ, "/marker/occulded");
+	OscMessageInitialise(&m_pc, "/marker/solved/pc");
+	OscMessageInitialise(&m_model, "/marker/solved/model");
+
+	OscMessageInitialise(&m_modID, "/marker/modelID");
+	OscMessageInitialise(&m_marID, "/marker/markerID");
+	OscMessageInitialise(&m_size, "/marker/size");
 
 	for (i = 0; i < data->nLabeledMarkers; i++)
 	{
-
-		str_addr = "/marker/" + std::to_string(i);
-
-		bOccluded = ((data->LabeledMarkers[i].params & 0x01) != 0);
-		bPCSolved = ((data->LabeledMarkers[i].params & 0x02) != 0);
-		bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);
-		bHasModel = ((data->LabeledMarkers[i].params & 0x08) != 0);
-		bUnlabeled = ((data->LabeledMarkers[i].params & 0x10) != 0);
-		bActiveMarker = ((data->LabeledMarkers[i].params & 0x20) != 0);
-
 		sMarker marker = data->LabeledMarkers[i];
+
+		bOccluded = ((marker.params & 0x01) != 0);
+		bPCSolved = ((marker.params & 0x02) != 0);
+		bModelSolved = ((marker.params & 0x04) != 0);
+		bHasModel = ((marker.params & 0x08) != 0);
+		bUnlabeled = ((marker.params & 0x10) != 0);
+		bActiveMarker = ((marker.params & 0x20) != 0);
+
 
 		// Marker ID Scheme:
 		// Active Markers:
@@ -805,56 +824,53 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		int modelID, markerID;
 		NatNet_DecodeID(marker.ID, &modelID, &markerID);
 
-		OscMessageInitialise(&msg, (str_addr + "/type").c_str());
-		if (bActiveMarker)
-			OscMessageAddString(&msg, "Active");
-		else if (bUnlabeled)
-			OscMessageAddString(&msg, "Unlabeled");
-		else
-			OscMessageAddString(&msg, "Labeled");
+		OscMessageAddBool(&m_active, bActiveMarker);
+		OscMessageAddBool(&m_labeled , !bUnlabeled);
+		OscMessageAddBool(&m_occ, bOccluded);
+		OscMessageAddBool(&m_pc, bPCSolved);
+		OscMessageAddBool(&m_model, bModelSolved);
+		OscMessageAddInt32(&m_modID, modelID);
+		OscMessageAddInt32(&m_marID, markerID);
+		OscMessageAddFloat32(&m_size, marker.size);
 
-		OscBundleAddContents(&bndl, &msg);
-
-		OscMessageInitialise(&msg, (str_addr + "/modelID").c_str());
-		OscMessageAddInt32(&msg, modelID);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/markerID").c_str());
-		OscMessageAddInt32(&msg, markerID);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/occluded").c_str());
-		OscMessageAddBool(&msg, bOccluded);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/pcSolved").c_str());
-		OscMessageAddBool(&msg, bPCSolved);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/modelSolved").c_str());
-		OscMessageAddBool(&msg, bModelSolved);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/size").c_str());
-		OscMessageAddFloat32(&msg, marker.size);
-		OscBundleAddContents(&bndl, &msg);
-
-
-		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str());
-		OscMessageAddFloat32(&msg, marker.x);
-		OscMessageAddFloat32(&msg, marker.y);
-		OscMessageAddFloat32(&msg, marker.z);
-		OscBundleAddContents(&bndl, &msg);
+		OscMessageAddFloat32(&m_x, marker.x);
+		OscMessageAddFloat32(&m_y, marker.y);
+		OscMessageAddFloat32(&m_z, marker.z);
 
 		/*
 		printf("%s Marker [ModelID=%d, MarkerID=%d, Occluded=%d, PCSolved=%d, ModelSolved=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
 			szMarkerType, modelID, markerID, bOccluded, bPCSolved, bModelSolved, marker.size, marker.x, marker.y, marker.z);
 		*/
+	}
+
+	OscBundleAddContents(&bndl, &m_x);
+	OscBundleAddContents(&bndl, &m_y);
+	OscBundleAddContents(&bndl, &m_z);
+	OscBundleAddContents(&bndl, &m_active);
+	OscBundleAddContents(&bndl, &m_labeled);
+	OscBundleAddContents(&bndl, &m_occ);
+	OscBundleAddContents(&bndl, &m_pc);
+	OscBundleAddContents(&bndl, &m_model);
+	OscBundleAddContents(&bndl, &m_marID);
+	OscBundleAddContents(&bndl, &m_modID);
+	OscBundleAddContents(&bndl, &m_size);
+
+
+	OscMessageInitialise(&msg, "/otherMarker/count");
+	OscMessageAddInt32(&msg, data->nOtherMarkers);
+	OscBundleAddContents(&bndl, &msg);
+	for (i = 0; i < data->nOtherMarkers; i++)
+	{
+		str_addr = "/otherMarker/" + std::to_string(i);
+
+		MarkerData& pos = data->OtherMarkers[i];
+
+		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str());
+		OscMessageAddFloat32(&msg, pos[0]);
+		OscMessageAddFloat32(&msg, pos[1]);
+		OscMessageAddFloat32(&msg, pos[2]);
+		OscBundleAddContents(&bndl, &msg);
+
 	}
 
 	/*
