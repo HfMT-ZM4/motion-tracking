@@ -92,8 +92,8 @@ int main(int argc, char* argv[])
 	NatNet_GetVersion(ver);
 	printf("NatNet Sample Client (NatNet ver. %d.%d.%d.%d)\n", ver[0], ver[1], ver[2], ver[3]);
 
-	// to do: add IP address settable from command prompt
 	setupSocket();
+
 
 	// Install logging callback
 	NatNet_SetLogCallback(MessageHandler);
