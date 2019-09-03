@@ -71,6 +71,7 @@ sServerDescription g_serverDescription;
 struct sockaddr_in g_sendToAddr;
 int g_socket;
 
+
 bool sendOSC(const void * osc)
 {
 	// Create OSC packet from OSC message or OSC bundle
@@ -566,8 +567,13 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscBundleInitialise(&bndl, oscTimeTagZero);
 
 	OscMessage msg;
-	OscMessageInitialise(&msg, "/frameID");
+	/*
+	printf("FrameID : %d\n", data->iFrame);
+	printf("Timestamp : %3.2lf\n", data->fTimestamp);
+	printf("Software latency : %.2lf milliseconds\n", softwareLatencyMillisec);
+	*/
 
+	OscMessageInitialise(&msg, "/frameID");
 	OscMessageAddInt32(&msg, data->iFrame);
 	OscBundleAddContents(&bndl, &msg);
 
@@ -575,11 +581,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageAddDouble(&msg, data->fTimestamp);
 	OscBundleAddContents(&bndl, &msg);
 
-	sendOSC(&bndl);
-
-	printf("FrameID : %d\n", data->iFrame);
-	printf("Timestamp : %3.2lf\n", data->fTimestamp);
-	printf("Software latency : %.2lf milliseconds\n", softwareLatencyMillisec);
+	OscMessageInitialise(&msg, "/latency/software");
+	OscMessageAddDouble(&msg, softwareLatencyMillisec);
+	OscBundleAddContents(&bndl, &msg);
 
 	// Only recent versions of the Motive software in combination with ethernet camera systems support system latency measurement.
 	// If it's unavailable (for example, with USB camera systems, or during playback), this field will be zero.
@@ -601,21 +605,41 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		// You could equivalently do the following (not accounting for time elapsed since we calculated transit latency above):
 		//const double clientLatencyMillisec = systemLatencyMillisec + transitLatencyMillisec;
 
+		OscMessageInitialise(&msg, "/latency/system");
+		OscMessageAddDouble(&msg, systemLatencyMillisec);
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, "/latency/client");
+		OscMessageAddDouble(&msg, clientLatencyMillisec);
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, "/latency/transit");
+		OscMessageAddDouble(&msg, transitLatencyMillisec);
+		OscBundleAddContents(&bndl, &msg);
+		/*
 		printf("System latency : %.2lf milliseconds\n", systemLatencyMillisec);
 		printf("Total client latency : %.2lf milliseconds (transit time +%.2lf ms)\n", clientLatencyMillisec, transitLatencyMillisec);
+		*/
 	}
 	else
 	{
-		printf("Transit latency : %.2lf milliseconds\n", transitLatencyMillisec);
+		OscMessageInitialise(&msg, "/latency/transit");
+		OscMessageAddDouble(&msg, transitLatencyMillisec);
+		OscBundleAddContents(&bndl, &msg);
+
+		//printf("Transit latency : %.2lf milliseconds\n", transitLatencyMillisec);
 	}
 
 	// FrameOfMocapData params
 	bool bIsRecording = ((data->params & 0x01) != 0);
+	OscMessageInitialise(&msg, "/isRecording");
+	OscMessageAddBool(&msg, bIsRecording);
+	OscBundleAddContents(&bndl, &msg);
+
 	bool bTrackedModelsChanged = ((data->params & 0x02) != 0);
-	if (bIsRecording)
-		printf("RECORDING\n");
-	if (bTrackedModelsChanged)
-		printf("Models Changed.\n");
+	OscMessageInitialise(&msg, "/modelChanged");
+	OscMessageAddBool(&msg, bTrackedModelsChanged);
+	OscBundleAddContents(&bndl, &msg);
 
 
 	// timecode - for systems with an eSync and SMPTE timecode generator - decode to values
@@ -624,16 +648,55 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	// decode to friendly string
 	char szTimecode[128] = "";
 	NatNet_TimecodeStringify(data->Timecode, data->TimecodeSubframe, szTimecode, 128);
-	printf("Timecode : %s\n", szTimecode);
+	//printf("Timecode : %s\n", szTimecode);
+
+	OscMessageInitialise(&msg, "/timecode");
+	OscMessageAddString(&msg, szTimecode);
+	OscBundleAddContents(&bndl, &msg);
+
 
 	// Rigid Bodies
-	printf("Rigid Bodies [Count=%d]\n", data->nRigidBodies);
+	//printf("Rigid Bodies [Count=%d]\n", data->nRigidBodies);
+	OscMessageInitialise(&msg, "/rigidBody/count");
+	OscMessageAddInt32(&msg, data->nRigidBodies);
+	OscBundleAddContents(&bndl, &msg);
+
+	std::string str_addr;
+
 	for (i = 0; i < data->nRigidBodies; i++)
 	{
+		str_addr = "/rigidBody/" + std::to_string(i);
+
+		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str() );
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].x);
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].y);
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].z);
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, (str_addr + "/quat").c_str() );
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].qx);
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].qy);
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].qz);
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].qw);
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, (str_addr + "/id").c_str() );
+		OscMessageAddInt32(&msg, data->RigidBodies[i].ID);
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, (str_addr + "/meanError").c_str());
+		OscMessageAddFloat32(&msg, data->RigidBodies[i].MeanError);
+		OscBundleAddContents(&bndl, &msg);
+
 		// params
 		// 0x01 : bool, rigid body was successfully tracked in this frame
 		bool bTrackingValid = data->RigidBodies[i].params & 0x01;
 
+		OscMessageInitialise(&msg, (str_addr + "/validTracking").c_str());
+		OscMessageAddBool(&msg, bTrackingValid );
+		OscBundleAddContents(&bndl, &msg);
+
+		/*
 		printf("Rigid Body [ID=%d  Error=%3.2f  Valid=%d]\n", data->RigidBodies[i].ID, data->RigidBodies[i].MeanError, bTrackingValid);
 		printf("\tx\ty\tz\tqx\tqy\tqz\tqw\n");
 		printf("\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
@@ -644,10 +707,15 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			data->RigidBodies[i].qy,
 			data->RigidBodies[i].qz,
 			data->RigidBodies[i].qw);
+		*/
 	}
 
 	// Skeletons
-	printf("Skeletons [Count=%d]\n", data->nSkeletons);
+	//printf("Skeletons [Count=%d]\n", data->nSkeletons);
+	OscMessageInitialise(&msg, "/skeleton/count");
+	OscMessageAddInt32(&msg, data->nSkeletons);
+	OscBundleAddContents(&bndl, &msg);
+
 	for (i = 0; i < data->nSkeletons; i++)
 	{
 		sSkeletonData skData = data->Skeletons[i];
@@ -668,9 +736,20 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
 	bool bActiveMarker; // marker is an actively labeled LED marker
 
-	printf("Markers [Count=%d]\n", data->nLabeledMarkers);
+	//printf("Markers [Count=%d]\n", data->nLabeledMarkers);
+	OscMessageInitialise(&msg, "/marker/count");
+	OscMessageAddInt32(&msg, data->nLabeledMarkers);
+	OscBundleAddContents(&bndl, &msg);
+
+	OscMessageInitialise(&msg, "/otherMarker/count");
+	OscMessageAddInt32(&msg, data->nOtherMarkers);
+	OscBundleAddContents(&bndl, &msg);
+
 	for (i = 0; i < data->nLabeledMarkers; i++)
 	{
+
+		str_addr = "/marker/" + std::to_string(i);
+
 		bOccluded = ((data->LabeledMarkers[i].params & 0x01) != 0);
 		bPCSolved = ((data->LabeledMarkers[i].params & 0x02) != 0);
 		bModelSolved = ((data->LabeledMarkers[i].params & 0x04) != 0);
@@ -692,18 +771,59 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		int modelID, markerID;
 		NatNet_DecodeID(marker.ID, &modelID, &markerID);
 
-		char szMarkerType[512];
+		OscMessageInitialise(&msg, (str_addr + "/type").c_str());
 		if (bActiveMarker)
-			strcpy_s(szMarkerType, "Active");
+			OscMessageAddString(&msg, "Active");
 		else if (bUnlabeled)
-			strcpy_s(szMarkerType, "Unlabeled");
+			OscMessageAddString(&msg, "Unlabeled");
 		else
-			strcpy_s(szMarkerType, "Labeled");
+			OscMessageAddString(&msg, "Labeled");
 
+		OscBundleAddContents(&bndl, &msg);
+
+		OscMessageInitialise(&msg, (str_addr + "/modelID").c_str());
+		OscMessageAddInt32(&msg, modelID);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/markerID").c_str());
+		OscMessageAddInt32(&msg, markerID);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/occluded").c_str());
+		OscMessageAddBool(&msg, bOccluded);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/pcSolved").c_str());
+		OscMessageAddBool(&msg, bPCSolved);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/modelSolved").c_str());
+		OscMessageAddBool(&msg, bModelSolved);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/size").c_str());
+		OscMessageAddFloat32(&msg, marker.size);
+		OscBundleAddContents(&bndl, &msg);
+
+
+		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str());
+		OscMessageAddFloat32(&msg, marker.x);
+		OscMessageAddFloat32(&msg, marker.y);
+		OscMessageAddFloat32(&msg, marker.z);
+		OscBundleAddContents(&bndl, &msg);
+
+		/*
 		printf("%s Marker [ModelID=%d, MarkerID=%d, Occluded=%d, PCSolved=%d, ModelSolved=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
 			szMarkerType, modelID, markerID, bOccluded, bPCSolved, bModelSolved, marker.size, marker.x, marker.y, marker.z);
+		*/
 	}
 
+	/*
 	// force plates
 	printf("Force Plate [Count=%d]\n", data->nForcePlates);
 	for (int iPlate = 0; iPlate < data->nForcePlates; iPlate++)
@@ -747,6 +867,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			printf("\n");
 		}
 	}
+	*/
+	sendOSC(&bndl);
+
 }
 
 
