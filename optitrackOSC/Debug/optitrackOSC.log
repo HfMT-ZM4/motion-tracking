@@ -1,3 +1,5 @@
 ﻿  optitrackOSC.cpp
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(96,7): warning C4101:  'message': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(95,7): warning C4101:  'buf': unreferenced local variable
   optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\Debug\optitrackOSC.exe
   0 File(s) copied

@@ -36,7 +36,15 @@ Usage [optional]:
 #include <NatNetClient.h>
 
 #include "Osc99.h"
-//#include "OscMessage.h"
+
+#include <winsock2.h>
+#pragma warning(disable:4996) 
+
+#pragma comment(lib,"ws2_32.lib") //Winsock Library
+
+#define SENDTOADDR "192.168.178.36"	
+#define BUFLEN 512	
+#define PORT 8888	
 
 #ifndef _WIN32
 char getch();
@@ -61,6 +69,67 @@ char g_discoveredMulticastGroupAddr[kNatNetIpv4AddrStrLenMax] = NATNET_DEFAULT_M
 int g_analogSamplesPerMocapFrame = 0;
 sServerDescription g_serverDescription;
 
+struct sockaddr_in g_sendToAddr;
+int g_socket;
+
+bool sendMessage(OscMessage& msg)
+{
+
+	// Create OSC packet from OSC message or OSC bundle
+	OscPacket oscPacket;
+	if (OscPacketInitialiseFromContents(&oscPacket, &msg) != OscErrorNone) {
+		return 0; // error: unable to create an OSC packet from the OSC contents
+	}
+
+	if( send(g_socket, oscPacket.contents, oscPacket.size, 0) == SOCKET_ERROR )
+	{
+		printf(" sendto() failed with error code : % d ", WSAGetLastError());
+		exit(EXIT_FAILURE);
+	}
+	return 1;
+}
+
+void setupSocket()
+{
+	int slen = sizeof(g_sendToAddr);
+	char buf[BUFLEN];
+	char message[BUFLEN];
+	WSADATA wsa;
+
+	//Initialise winsock
+	printf(" \nInitialising Winsock... ");
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	{
+		printf(" Failed.Error Code : % d ", WSAGetLastError());
+		exit(EXIT_FAILURE);
+	}
+	printf(" Initialised.\n ");
+
+	//create socket
+	if ((g_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == SOCKET_ERROR)
+	{
+		printf(" socket() failed with error code : % d ", WSAGetLastError());
+		exit(EXIT_FAILURE);
+	}
+
+	//setup address structure
+	memset((char*)& g_sendToAddr, 0, sizeof(g_sendToAddr));
+	g_sendToAddr.sin_family = AF_INET;
+	g_sendToAddr.sin_port = htons(PORT);
+	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(SENDTOADDR);
+
+	//----------------------
+// Connect to server.
+	int iResult = connect(g_socket, (SOCKADDR*)& g_sendToAddr, sizeof(g_sendToAddr));
+	if (iResult == SOCKET_ERROR) {
+		wprintf(L"connect failed with error: %d\n", WSAGetLastError());
+		closesocket(g_socket);
+		WSACleanup();
+		return;
+	}
+
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -68,6 +137,9 @@ int main(int argc, char* argv[])
 	unsigned char ver[4];
 	NatNet_GetVersion(ver);
 	printf("NatNet Sample Client (NatNet ver. %d.%d.%d.%d)\n", ver[0], ver[1], ver[2], ver[3]);
+
+
+	setupSocket();
 
 	OscMessage msg;
 	char buf[128];
@@ -82,6 +154,7 @@ int main(int argc, char* argv[])
 		return -1; // error: unable to create an OSC packet from the OSC contents
 	}
 
+	sendMessage(msg);
 	/*
 	for( int i = 0; i < oscPacket.size; i++)
 		printf("%c\n", oscPacket.contents[i]);
@@ -112,19 +185,6 @@ int main(int argc, char* argv[])
 	// attempt to discover servers on the local network.
 	if (argc == 1)
 	{
-		// An example of synchronous server discovery.
-#if 0
-		const unsigned int kDiscoveryWaitTimeMillisec = 5 * 1000; // Wait 5 seconds for responses.
-		const int kMaxDescriptions = 10; // Get info for, at most, the first 10 servers to respond.
-		sNatNetDiscoveredServer servers[kMaxDescriptions];
-		int actualNumDescriptions = kMaxDescriptions;
-		NatNet_BroadcastServerDiscovery(servers, &actualNumDescriptions);
-
-		if (actualNumDescriptions < kMaxDescriptions)
-		{
-			// If this happens, more servers responded than the array was able to store.
-		}
-#endif
 
 		// Do asynchronous server discovery.
 		printf("Looking for servers on the local network.\n");
@@ -424,6 +484,10 @@ int main(int argc, char* argv[])
 		fclose(g_outputFile);
 		g_outputFile = NULL;
 	}
+
+
+	closesocket(g_socket);
+	WSACleanup();
 
 	return ErrorCode_OK;
 }
@@ -849,3 +913,4 @@ char getch()
 	return buf;
 }
 #endif
+
