@@ -61,7 +61,6 @@ int ConnectClient();
 static const ConnectionType kDefaultConnectionType = ConnectionType_Multicast;
 
 NatNetClient* g_pClient = NULL;
-FILE* g_outputFile;
 
 std::vector< sNatNetDiscoveredServer > g_discoveredServers;
 sNatNetClientConnectParams g_connectParams;
@@ -72,12 +71,11 @@ sServerDescription g_serverDescription;
 struct sockaddr_in g_sendToAddr;
 int g_socket;
 
-bool sendMessage(OscMessage& msg)
+bool sendOSC(const void * osc)
 {
-
 	// Create OSC packet from OSC message or OSC bundle
 	OscPacket oscPacket;
-	if (OscPacketInitialiseFromContents(&oscPacket, &msg) != OscErrorNone) {
+	if (OscPacketInitialiseFromContents(&oscPacket, osc) != OscErrorNone) {
 		return 0; // error: unable to create an OSC packet from the OSC contents
 	}
 
@@ -138,39 +136,8 @@ int main(int argc, char* argv[])
 	NatNet_GetVersion(ver);
 	printf("NatNet Sample Client (NatNet ver. %d.%d.%d.%d)\n", ver[0], ver[1], ver[2], ver[3]);
 
-
 	setupSocket();
 
-	OscMessage msg;
-	char buf[128];
-	sprintf_s(buf, "%d.%d.%d.%d", ver[0], ver[1], ver[2], ver[3]);
-
-	OscMessageInitialise(&msg, "/NatNet/version");
-	OscMessageAddString(&msg, buf);
-
-	// Create OSC packet from OSC message or OSC bundle
-	OscPacket oscPacket;
-	if (OscPacketInitialiseFromContents(&oscPacket, &msg) != OscErrorNone) {
-		return -1; // error: unable to create an OSC packet from the OSC contents
-	}
-
-	sendMessage(msg);
-	/*
-	for( int i = 0; i < oscPacket.size; i++)
-		printf("%c\n", oscPacket.contents[i]);
-	*/
-
-	/*
-	// Encode SLIP packet
-	char slipPacket[MAX_OSC_PACKET_SIZE];
-	size_t slipPacketSize;
-	if (OscSlipEncodePacket(&oscPacket, &slipPacketSize, slipPacket, sizeof(slipPacket)) != OscErrorNone) {
-		return; // error: the encoded SLIP packet is too long for the size of slipPacket
-	}
-
-	// Send SLIP packet
-	Serial.write((uint8_t*)slipPacket, slipPacketSize); // typecast from char* to uint8_t*
-	*/
 
 	// Install logging callback
 	NatNet_SetLogCallback(MessageHandler);
@@ -394,7 +361,6 @@ int main(int argc, char* argv[])
 
 	if (pDataDefs)
 	{
-		_WriteHeader(g_outputFile, pDataDefs);
 		NatNet_FreeDescriptions(pDataDefs);
 		pDataDefs = NULL;
 	}
@@ -476,13 +442,6 @@ int main(int argc, char* argv[])
 		g_pClient->Disconnect();
 		delete g_pClient;
 		g_pClient = NULL;
-	}
-
-	if (g_outputFile)
-	{
-		_WriteFooter(g_outputFile);
-		fclose(g_outputFile);
-		g_outputFile = NULL;
 	}
 
 
@@ -601,12 +560,22 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	// The SecondsSinceHostTimestamp method relies on NatNetClient's internal clock synchronization with the server using Cristian's algorithm.
 	const double transitLatencyMillisec = pClient->SecondsSinceHostTimestamp(data->TransmitTimestamp) * 1000.0;
 
-	if (g_outputFile)
-	{
-		_WriteFrame(g_outputFile, data);
-	}
-
 	int i = 0;
+
+	OscBundle bndl;
+	OscBundleInitialise(&bndl, oscTimeTagZero);
+
+	OscMessage msg;
+	OscMessageInitialise(&msg, "/frameID");
+
+	OscMessageAddInt32(&msg, data->iFrame);
+	OscBundleAddContents(&bndl, &msg);
+
+	OscMessageInitialise(&msg, "/timestamp");
+	OscMessageAddDouble(&msg, data->fTimestamp);
+	OscBundleAddContents(&bndl, &msg);
+
+	sendOSC(&bndl);
 
 	printf("FrameID : %d\n", data->iFrame);
 	printf("Timestamp : %3.2lf\n", data->fTimestamp);

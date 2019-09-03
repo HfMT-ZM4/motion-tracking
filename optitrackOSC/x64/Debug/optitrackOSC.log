@@ -1,7 +1,7 @@
 ﻿  optitrackOSC.cpp
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(84,4): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(109,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(96,7): warning C4101:  'message': unreferenced local variable
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(95,7): warning C4101:  'buf': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(82,4): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(107,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(94,7): warning C4101:  'message': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(93,7): warning C4101:  'buf': unreferenced local variable
   optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Debug\optitrackOSC.exe
   0 File(s) copied
