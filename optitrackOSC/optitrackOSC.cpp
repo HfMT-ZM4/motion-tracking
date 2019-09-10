@@ -47,7 +47,7 @@ Usage [optional]:
 
 // send to defs
 
-#define SENDTOADDR "192.168.178.36"	// address to send to
+#define SENDTOADDR "169.254.6.207"	// address to send to
 #define PORT 8888	
 
 // prototypes
@@ -77,6 +77,13 @@ sServerDescription g_serverDescription;
 #endif
 
 std::unordered_map<int, std::string> g_rigidBodyNames, g_markerNames;
+
+// Used for converting NatNet data to the proper units.
+float g_unitConversion = 1.0f;
+
+// World Up Axis (default to Y)
+int g_upAxis = 1; // 
+
 
 // --
 
@@ -256,6 +263,7 @@ int main(int argc, char* argv[])
 		pDataDefs = NULL;
 	}
 
+
 	// Ready to receive marker stream!
 	printf("\nClient is connected to server and listening for data...\n");
 	int c;
@@ -426,6 +434,22 @@ int ConnectClient()
 		}
 		else
 			printf("Error getting Analog frame rate.\n");
+
+
+		// example of NatNet general message passing. Set units to millimeters
+	// and get the multiplicative conversion factor in the response.
+
+		ret = g_pClient->SendMessageAndWait("UnitsToMillimeters", &pResult, &nBytes);
+		if (ret == ErrorCode_OK)
+		{
+			g_unitConversion = *(float*)pResult;
+		}
+
+		ret = g_pClient->SendMessageAndWait("UpAxis", &pResult, &nBytes);
+		if (ret == ErrorCode_OK)
+		{
+			g_upAxis = *(long*)pResult;
+		}
 	}
 
 	return ErrorCode_OK;
@@ -574,9 +598,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	{
 		sRigidBodyData& _rb = data->RigidBodies[i];
 
-		OscMessageAddFloat32(&m_x, _rb.x);
-		OscMessageAddFloat32(&m_y, _rb.y);
-		OscMessageAddFloat32(&m_z, _rb.z);
+		OscMessageAddFloat32(&m_x, _rb.x * g_unitConversion);
+		OscMessageAddFloat32(&m_y, _rb.y * g_unitConversion);
+		OscMessageAddFloat32(&m_z, _rb.z * g_unitConversion);
 
 		OscMessageAddFloat32(&m_qx, _rb.qx);
 		OscMessageAddFloat32(&m_qy, _rb.qy);
@@ -716,9 +740,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddInt32(&m_marID, markerID);
 		OscMessageAddFloat32(&m_size, marker.size);
 
-		OscMessageAddFloat32(&m_x, marker.x);
-		OscMessageAddFloat32(&m_y, marker.y);
-		OscMessageAddFloat32(&m_z, marker.z);
+		OscMessageAddFloat32(&m_x, marker.x * g_unitConversion);
+		OscMessageAddFloat32(&m_y, marker.y * g_unitConversion);
+		OscMessageAddFloat32(&m_z, marker.z* g_unitConversion);
 
 		/*
 		printf("%s Marker [ModelID=%d, MarkerID=%d, Occluded=%d, PCSolved=%d, ModelSolved=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",

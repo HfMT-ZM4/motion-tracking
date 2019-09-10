@@ -1,1 +1,18 @@
-﻿
+﻿  optitrackOSC.cpp
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(158,24): warning C4101:  'm_z': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(158,35): warning C4101:  'm_name': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(158,29): warning C4101:  'm_id': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(158,19): warning C4101:  'm_y': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(157,13): warning C4101:  'bndl': unreferenced local variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(615,33): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(625,34): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(632,32): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(893,65): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(920,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
+  Generating code
+  3 of 322 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Release\optitrackOSC.exe
+  0 File(s) copied
