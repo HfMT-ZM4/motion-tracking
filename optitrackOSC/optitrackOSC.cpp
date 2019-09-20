@@ -47,7 +47,7 @@ Usage [optional]:
 
 // send to defs
 
-#define SENDTOADDR "169.254.6.207"	// address to send to
+#define SENDTOADDR "169.254.1.111"	// address to send to
 #define PORT 8888	
 
 // prototypes
