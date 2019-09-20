@@ -2,6 +2,6 @@
 
 ECHO starting up optitrack OSC relay
 
-optitrackOSC.exe
+optitrackOSC.exe 169.254.1.1 8888
 
 PAUSE

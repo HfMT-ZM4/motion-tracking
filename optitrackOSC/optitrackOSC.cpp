@@ -47,8 +47,8 @@ Usage [optional]:
 
 // send to defs
 
-#define SENDTOADDR "169.254.1.111"	// address to send to
-#define PORT 8888	
+char sendToIP[16] = "169.254.1.111";	// address to send to
+int sendToPort = 8888;
 
 // prototypes
 
@@ -91,9 +91,13 @@ int g_upAxis = 1; //
 int main(int argc, char* argv[])
 {
 
-	for( int i = 0; i < argc; i++)
-		printf("%i %s\n", argc, argv[i]);
+	if (argc == 3)
+	{
+		strncpy(sendToIP, argv[1], 16);
+		sendToPort = std::stoi(argv[2]);
+		printf("setting up to stream motive OSC to %s on port %i\n", sendToIP, sendToPort);
 
+	}
 
 	// print version info
 	unsigned char ver[4];
@@ -926,8 +930,8 @@ void setupSocket()
 	//setup address structure
 	memset((char*)& g_sendToAddr, 0, sizeof(g_sendToAddr));
 	g_sendToAddr.sin_family = AF_INET;
-	g_sendToAddr.sin_port = htons(PORT);
-	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(SENDTOADDR);
+	g_sendToAddr.sin_port = htons(sendToPort);
+	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(sendToIP);
 
 
 
