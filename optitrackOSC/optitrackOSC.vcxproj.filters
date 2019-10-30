@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\OSC99\Osc99\OscSlip.c">
       <Filter>Source Files\osc99</Filter>
     </ClCompile>
+    <ClCompile Include="NatUtils_hfmt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\OSC99\Osc99\Osc99.h">
@@ -70,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="..\..\OSC99\Osc99\OscSlip.h">
       <Filter>Header Files\osc99</Filter>
+    </ClInclude>
+    <ClInclude Include="NATUtils_hfmt.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
