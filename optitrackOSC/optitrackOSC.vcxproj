@@ -182,6 +182,7 @@
     <ClCompile Include="..\..\OSC99\Osc99\OscMessage.c" />
     <ClCompile Include="..\..\OSC99\Osc99\OscPacket.c" />
     <ClCompile Include="..\..\OSC99\Osc99\OscSlip.c" />
+    <ClCompile Include="NatUtils_hfmt.cpp" />
     <ClCompile Include="optitrackOSC.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,7 @@
     <ClInclude Include="..\..\OSC99\Osc99\OscMessage.h" />
     <ClInclude Include="..\..\OSC99\Osc99\OscPacket.h" />
     <ClInclude Include="..\..\OSC99\Osc99\OscSlip.h" />
+    <ClInclude Include="NATUtils_hfmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

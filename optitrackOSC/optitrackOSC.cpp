@@ -37,6 +37,7 @@ Usage [optional]:
 #include <NatNetTypes.h>
 #include <NatNetCAPI.h>
 #include <NatNetClient.h>
+#include "NatUtils_hfmt.h"
 
 #include "Osc99.h"
 
@@ -47,8 +48,8 @@ Usage [optional]:
 
 // send to defs
 
-#define SENDTOADDR "192.168.178.36"	// address to send to
-#define PORT 8888	
+char sendToIP[16] = "169.254.1.111";	// address to send to
+int sendToPort = 8888;
 
 // prototypes
 
@@ -59,6 +60,8 @@ void resetClient();
 int ConnectClient();
 bool sendOSC(const void* osc);
 void setupSocket();
+void ConvertRHSPosZupToYUp(float& x, float& y, float& z);
+void ConvertRHSRotZUpToYUp(float& qx, float& qy, float& qz, float& qw);
 
 // globals
 
@@ -78,15 +81,27 @@ sServerDescription g_serverDescription;
 
 std::unordered_map<int, std::string> g_rigidBodyNames, g_markerNames;
 
+// Used for converting NatNet data to the proper units.
+float g_unitConversion = 1.0f;
+
+// World Up Axis (default to Y)
+int g_upAxis = 1; // 
+
+int eulOrder = EulOrdXYXr;
+
 // --
 
 
 int main(int argc, char* argv[])
 {
 
-	for( int i = 0; i < argc; i++)
-		printf("%i %s\n", argc, argv[i]);
+	if (argc == 3)
+	{
+		strncpy(sendToIP, argv[1], 16);
+		sendToPort = std::stoi(argv[2]);
+		printf("setting up to stream motive OSC to %s on port %i\n", sendToIP, sendToPort);
 
+	}
 
 	// print version info
 	unsigned char ver[4];
@@ -255,6 +270,7 @@ int main(int argc, char* argv[])
 		NatNet_FreeDescriptions(pDataDefs);
 		pDataDefs = NULL;
 	}
+
 
 	// Ready to receive marker stream!
 	printf("\nClient is connected to server and listening for data...\n");
@@ -426,10 +442,28 @@ int ConnectClient()
 		}
 		else
 			printf("Error getting Analog frame rate.\n");
+
+
+		// example of NatNet general message passing. Set units to millimeters
+	// and get the multiplicative conversion factor in the response.
+
+		ret = g_pClient->SendMessageAndWait("UnitsToMillimeters", &pResult, &nBytes);
+		if (ret == ErrorCode_OK)
+		{
+			g_unitConversion = *(float*)pResult;
+		}
+
+		ret = g_pClient->SendMessageAndWait("UpAxis", &pResult, &nBytes);
+		if (ret == ErrorCode_OK)
+		{
+			g_upAxis = *(long*)pResult;
+		}
 	}
 
 	return ErrorCode_OK;
 }
+
+
 
 // DataHandler receives data from the server
 // This function is called by NatNet when a frame of mocap data is available
@@ -569,20 +603,41 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 
 	
 	std::string str_addr;
+	EulerAngles ea;
 
 	for (i = 0; i < data->nRigidBodies; i++)
 	{
 		sRigidBodyData& _rb = data->RigidBodies[i];
 
-		OscMessageAddFloat32(&m_x, _rb.x);
-		OscMessageAddFloat32(&m_y, _rb.y);
-		OscMessageAddFloat32(&m_z, _rb.z);
+		if (g_upAxis == 2)
+		{
+			// convert position
+			ConvertRHSPosZupToYUp(_rb.x, _rb.y, _rb.z);
+			// convert orientation
+			ConvertRHSRotZUpToYUp(_rb.qx, _rb.qy, _rb.qz, _rb.qw);
+		}
+
+
+		OscMessageAddFloat32(&m_x, _rb.x * g_unitConversion);
+		OscMessageAddFloat32(&m_y, _rb.y * g_unitConversion);
+		OscMessageAddFloat32(&m_z, _rb.z * g_unitConversion);
 
 		OscMessageAddFloat32(&m_qx, _rb.qx);
 		OscMessageAddFloat32(&m_qy, _rb.qy);
 		OscMessageAddFloat32(&m_qz, _rb.qz);
 		OscMessageAddFloat32(&m_qw, _rb.qw);
+		
+		ea = Eul_FromQuat(Quat({ _rb.qx, _rb.qy, _rb.qz, _rb.qw }), eulOrder);
 
+		ea.x = NATUtils::RadiansToDegrees(ea.x);
+		ea.y = NATUtils::RadiansToDegrees(ea.y);
+		ea.z = NATUtils::RadiansToDegrees(ea.z);
+	
+		OscMessageAddFloat32(&m_pitch, ea.x);
+		OscMessageAddFloat32(&m_yaw, ea.y);
+		OscMessageAddFloat32(&m_roll, ea.z);
+
+		/*
 		// roll (x-axis rotation)
 		double sinr_cosp = +2.0 * (_rb.qw * _rb.qx + _rb.qy * _rb.qz);
 		double cosr_cosp = +1.0 - 2.0 * (_rb.qx * _rb.qx + _rb.qy * _rb.qy);
@@ -606,7 +661,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		double yaw = atan2(siny_cosp, cosy_cosp);
 
 		OscMessageAddFloat32(&m_yaw, yaw);
-
+		*/
 		OscMessageAddInt32(&m_id, _rb.ID);
 		OscMessageAddString(&m_name, g_rigidBodyNames[_rb.ID].c_str() );
 
@@ -716,9 +771,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddInt32(&m_marID, markerID);
 		OscMessageAddFloat32(&m_size, marker.size);
 
-		OscMessageAddFloat32(&m_x, marker.x);
-		OscMessageAddFloat32(&m_y, marker.y);
-		OscMessageAddFloat32(&m_z, marker.z);
+		OscMessageAddFloat32(&m_x, marker.x * g_unitConversion);
+		OscMessageAddFloat32(&m_y, marker.y * g_unitConversion);
+		OscMessageAddFloat32(&m_z, marker.z* g_unitConversion);
 
 		/*
 		printf("%s Marker [ModelID=%d, MarkerID=%d, Occluded=%d, PCSolved=%d, ModelSolved=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
@@ -902,8 +957,8 @@ void setupSocket()
 	//setup address structure
 	memset((char*)& g_sendToAddr, 0, sizeof(g_sendToAddr));
 	g_sendToAddr.sin_family = AF_INET;
-	g_sendToAddr.sin_port = htons(PORT);
-	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(SENDTOADDR);
+	g_sendToAddr.sin_port = htons(sendToPort);
+	g_sendToAddr.sin_addr.S_un.S_addr = inet_addr(sendToIP);
 
 
 
@@ -939,4 +994,48 @@ void setupSocket()
 	}
 
 
+}
+
+
+void ConvertRHSPosZupToYUp(float& x, float& y, float& z)
+{
+	/*
+	[RHS, Y-Up]     [RHS, Z-Up]
+
+						  Y
+	 Y                 Z /
+	 |__ X             |/__ X
+	 /
+	Z
+
+	Xyup  =  Xzup
+	Yyup  =  Zzup
+	Zyup  =  -Yzup
+	*/
+	float yOriginal = y;
+	y = z;
+	z = -yOriginal;
+}
+
+void ConvertRHSRotZUpToYUp(float& qx, float& qy, float& qz, float& qw)
+{
+	// -90 deg rotation about +X
+	float qRx, qRy, qRz, qRw;
+	float angle = -90.0f * M_PI / 180.0f;
+	qRx = sin(angle / 2.0f);
+	qRy = 0.0f;
+	qRz = 0.0f;
+	qRw = cos(angle / 2.0f);
+
+	// rotate quat using quat multiply
+	float qxNew, qyNew, qzNew, qwNew;
+	qxNew = qw * qRx + qx * qRw + qy * qRz - qz * qRy;
+	qyNew = qw * qRy - qx * qRz + qy * qRw + qz * qRx;
+	qzNew = qw * qRz + qx * qRy - qy * qRx + qz * qRw;
+	qwNew = qw * qRw - qx * qRx - qy * qRy - qz * qRz;
+
+	qx = qxNew;
+	qy = qyNew;
+	qz = qzNew;
+	qw = qwNew;
 }
