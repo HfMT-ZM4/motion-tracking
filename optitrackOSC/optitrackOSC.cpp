@@ -87,7 +87,9 @@ float g_unitConversion = 1.0f;
 // World Up Axis (default to Y)
 int g_upAxis = 1; // 
 
-int eulOrder = EulOrdXYXr;
+double radtodeg = 180.0 / M_PI;
+
+int eulOrder = EulOrdXYZr;
 
 // --
 
@@ -164,11 +166,11 @@ int main(int argc, char* argv[])
 	{
 		OscBundle bndl;
 		OscMessage m_x, m_y, m_z, m_id, m_name;
-		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/name");
-		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/id");
+		OscMessageInitialise(&m_name, "/dataDescription/rigidBody/name");
+		OscMessageInitialise(&m_id, "/dataDescription/rigidBody/id");
 		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/x");
-		OscMessageInitialise(&m_x, "/dataDescription/rigidBody/x");
-
+		OscMessageInitialise(&m_y, "/dataDescription/rigidBody/y");
+		OscMessageInitialise(&m_y, "/dataDescription/rigidBody/z");
 
 		printf("[SampleClient] Received %d Data Descriptions:\n", pDataDefs->nDataDescriptions);
 		for (int i = 0; i < pDataDefs->nDataDescriptions; i++)
@@ -457,6 +459,7 @@ int ConnectClient()
 		if (ret == ErrorCode_OK)
 		{
 			g_upAxis = *(long*)pResult;
+			printf("------------ UP AXIS: %i ---------\n", g_upAxis);
 		}
 	}
 
@@ -609,6 +612,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	{
 		sRigidBodyData& _rb = data->RigidBodies[i];
 
+		/*
 		if (g_upAxis == 2)
 		{
 			// convert position
@@ -616,7 +620,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			// convert orientation
 			ConvertRHSRotZUpToYUp(_rb.qx, _rb.qy, _rb.qz, _rb.qw);
 		}
-
+		*/
 
 		OscMessageAddFloat32(&m_x, _rb.x * g_unitConversion);
 		OscMessageAddFloat32(&m_y, _rb.y * g_unitConversion);
@@ -627,6 +631,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddFloat32(&m_qz, _rb.qz);
 		OscMessageAddFloat32(&m_qw, _rb.qw);
 		
+		/*
 		ea = Eul_FromQuat(Quat({ _rb.qx, _rb.qy, _rb.qz, _rb.qw }), eulOrder);
 
 		ea.x = NATUtils::RadiansToDegrees(ea.x);
@@ -636,32 +641,43 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddFloat32(&m_pitch, ea.x);
 		OscMessageAddFloat32(&m_yaw, ea.y);
 		OscMessageAddFloat32(&m_roll, ea.z);
+		*/
+		
+		// flety version
+		float q1 = _rb.qw;
+		float q2 = _rb.qx;
+		float q3 = _rb.qy;
+		float q4 = _rb.qz;
+
+		float yaw2 = atan2(2.0f * (q2 * q3 + q1 * q4), q1 * q1 + q2 * q2 - q3 * q3 - q4 * q4);
+		float pitch2 = -asin(2.0f * ((q2 * q4) - (q1 * q3)));
+		float roll2 = atan2(2.0f * (q1 * q2 + q3 * q4), (q1 * q1) - (q2 * q2) - (q3 * q3) + (q4 * q4));
 
 		/*
 		// roll (x-axis rotation)
-		double sinr_cosp = +2.0 * (_rb.qw * _rb.qx + _rb.qy * _rb.qz);
-		double cosr_cosp = +1.0 - 2.0 * (_rb.qx * _rb.qx + _rb.qy * _rb.qy);
-		double roll = atan2(sinr_cosp, cosr_cosp);
-
-		OscMessageAddFloat32(&m_roll, roll);
+		float sinr_cosp = 2.0f * (_rb.qw * _rb.qx + _rb.qy * _rb.qz);
+		float cosr_cosp = 1.0f - 2.0f * (_rb.qx * _rb.qx + _rb.qy * _rb.qy);
+		float roll = atan2(sinr_cosp, cosr_cosp);
 
 		// pitch (y-axis rotation)
-		double sinp = +2.0 * (_rb.qw * _rb.qy - _rb.qz * _rb.qx);
-		double pitch;
+		float sinp = 2.0f * (_rb.qw * _rb.qy - _rb.qz * _rb.qx);
+		float pitch;
 		if (fabs(sinp) >= 1)
 			pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
 		else
-			pitch = asin(sinp);
+			pitch = -asin(sinp);
 
-		OscMessageAddFloat32(&m_pitch, pitch);
 
 		// yaw (z-axis rotation)
-		double siny_cosp = +2.0 * (_rb.qw * _rb.qz + _rb.qx * _rb.qy);
-		double cosy_cosp = +1.0 - 2.0 * (_rb.qy * _rb.qy + _rb.qz * _rb.qz);
-		double yaw = atan2(siny_cosp, cosy_cosp);
-
-		OscMessageAddFloat32(&m_yaw, yaw);
+		float siny_cosp = 2.0f * (_rb.qw * _rb.qz + _rb.qx * _rb.qy);
+		float cosy_cosp = 1.0f - 2.0f * (_rb.qy * _rb.qy + _rb.qz * _rb.qz);
+		float yaw = atan2(siny_cosp, cosy_cosp);
 		*/
+
+		OscMessageAddFloat32(&m_roll, roll2 * radtodeg);
+		OscMessageAddFloat32(&m_pitch, pitch2 * radtodeg);
+		OscMessageAddFloat32(&m_yaw, yaw2 * radtodeg);
+		
 		OscMessageAddInt32(&m_id, _rb.ID);
 		OscMessageAddString(&m_name, g_rigidBodyNames[_rb.ID].c_str() );
 
