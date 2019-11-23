@@ -584,9 +584,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 
 	// Rigid Bodies
 	//printf("Rigid Bodies [Count=%d]\n", data->nRigidBodies);
-	OscMessageInitialise(&msg, "/rigidBody/count");
-	OscMessageAddInt32(&msg, data->nRigidBodies);
-	OscBundleAddContents(&bndl, &msg);
+	//OscMessageInitialise(&msg, "/rigidBody/count");
+	//OscMessageAddInt32(&msg, data->nRigidBodies);
+	//OscBundleAddContents(&bndl, &msg);
 
 	OscMessage m_x, m_y, m_z, m_qx, m_qy, m_qz, m_qw, m_roll, m_pitch, m_yaw, m_id, m_valid, m_meanError, m_name;
 	OscMessageInitialise(&m_x, "/rigidBody/x");
@@ -743,9 +743,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	bool bActiveMarker; // marker is an actively labeled LED marker
 
 	//printf("Markers [Count=%d]\n", data->nLabeledMarkers);
-	OscMessageInitialise(&msg, "/marker/count");
-	OscMessageAddInt32(&msg, data->nLabeledMarkers);
-	OscBundleAddContents(&bndl, &msg);
+	//OscMessageInitialise(&msg, "/marker/count");
+	//OscMessageAddInt32(&msg, data->nLabeledMarkers);
+	//OscBundleAddContents(&bndl, &msg);
 
 	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size;
 	OscMessageInitialise(&m_x, "/marker/x");
