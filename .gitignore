@@ -1,2 +1,4 @@
 .vs
 .DS_Store
+build
+*/build
