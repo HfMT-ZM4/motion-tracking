@@ -33,6 +33,7 @@ Usage [optional]:
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <chrono>
 
 #include <NatNetTypes.h>
 #include <NatNetCAPI.h>
@@ -58,7 +59,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData);    /
 void NATNET_CALLCONV MessageHandler(Verbosity msgType, const char* msg);      // receives NatNet error messages
 void resetClient();
 int ConnectClient();
-bool sendOSC(const void* osc);
+bool sendOSC(const OscBundle& osc);
 void setupSocket();
 void ConvertRHSPosZupToYUp(float& x, float& y, float& z);
 void ConvertRHSRotZUpToYUp(float& qx, float& qy, float& qz, float& qw);
@@ -80,6 +81,12 @@ sServerDescription g_serverDescription;
 #endif
 
 std::unordered_map<int, std::string> g_rigidBodyNames, g_markerNames;
+
+typedef std::chrono::high_resolution_clock chrono_clock;
+typedef std::chrono::duration<float, std::milli> duration_t;
+
+// modelID_markerID : number of frames
+std::unordered_map<std::string, std::chrono::steady_clock::time_point > g_model_marker_id_frames;
 
 // Used for converting NatNet data to the proper units.
 float g_unitConversion = 1.0f;
@@ -742,12 +749,12 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	bool bUnlabeled;    // marker is 'unlabeled', but has a point cloud ID that matches Motive PointCloud ID (In Motive 3D View)
 	bool bActiveMarker; // marker is an actively labeled LED marker
 
-	//printf("Markers [Count=%d]\n", data->nLabeledMarkers);
+	//printf("Markers [Count=%d] Unlabeled [Count=%d]\n", data->nLabeledMarkers, data->nOtherMarkers);
 	//OscMessageInitialise(&msg, "/marker/count");
 	//OscMessageAddInt32(&msg, data->nLabeledMarkers);
 	//OscBundleAddContents(&bndl, &msg);
 
-	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size;
+	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size, m_duration;
 	OscMessageInitialise(&m_x, "/marker/x");
 	OscMessageInitialise(&m_y, "/marker/y");
 	OscMessageInitialise(&m_z, "/marker/z");
@@ -761,6 +768,11 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscMessageInitialise(&m_modID, "/marker/modelID");
 	OscMessageInitialise(&m_marID, "/marker/markerID");
 	OscMessageInitialise(&m_size, "/marker/size");
+
+	OscMessageInitialise(&m_duration, "/marker/dur");
+
+
+	auto prev = g_model_marker_id_frames;
 
 	for (i = 0; i < data->nLabeledMarkers; i++)
 	{
@@ -776,7 +788,22 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		int modelID, markerID;
 
 		NatNet_DecodeID(marker.ID, &modelID, &markerID);
-		//printf("%i %i\n", modelID, markerID);
+		//printf("%i %i\n", i, markerID);
+		std::string model_marker_id = std::to_string(modelID) + "_" + std::to_string(markerID);
+
+		if (g_model_marker_id_frames.count(model_marker_id) == 0)
+		{
+			g_model_marker_id_frames[model_marker_id] = chrono_clock::now();
+			OscMessageAddInt32(&m_duration, 0);
+		}
+		else
+		{
+			duration_t dur = chrono_clock::now() - g_model_marker_id_frames[model_marker_id];
+			OscMessageAddFloat32(&m_duration, dur.count() * 0.001 );
+
+			prev.erase(model_marker_id);
+		}
+
 
 		OscMessageAddBool(&m_active, bActiveMarker);
 		OscMessageAddBool(&m_labeled , !bUnlabeled);
@@ -789,12 +816,20 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 
 		OscMessageAddFloat32(&m_x, marker.x * g_unitConversion);
 		OscMessageAddFloat32(&m_y, marker.y * g_unitConversion);
-		OscMessageAddFloat32(&m_z, marker.z* g_unitConversion);
+		OscMessageAddFloat32(&m_z, marker.z * g_unitConversion);
+		
+
 
 		/*
 		printf("%s Marker [ModelID=%d, MarkerID=%d, Occluded=%d, PCSolved=%d, ModelSolved=%d] [size=%3.2f] [pos=%3.2f,%3.2f,%3.2f]\n",
 			szMarkerType, modelID, markerID, bOccluded, bPCSolved, bModelSolved, marker.size, marker.x, marker.y, marker.z);
 		*/
+	}
+
+	// remove markers that were not updated from previous frame
+	for (const auto& p : prev)
+	{
+		g_model_marker_id_frames.erase(p.first);
 	}
 
 	OscBundleAddContents(&bndl, &m_x);
@@ -808,24 +843,25 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	OscBundleAddContents(&bndl, &m_marID);
 	OscBundleAddContents(&bndl, &m_modID);
 	OscBundleAddContents(&bndl, &m_size);
+	OscBundleAddContents(&bndl, &m_duration);
 
 	/*
-	OscMessageInitialise(&msg, "/otherMarker/count");
-	OscMessageAddInt32(&msg, data->nOtherMarkers);
-	OscBundleAddContents(&bndl, &msg);
+	OscMessageInitialise(&m_x, "/otherMarker/x");
+	OscMessageInitialise(&m_y, "/otherMarker/y");
+	OscMessageInitialise(&m_z, "/otherMarker/z");
+
 	for (i = 0; i < data->nOtherMarkers; i++)
 	{
-		str_addr = "/otherMarker/" + std::to_string(i);
-
 		MarkerData& pos = data->OtherMarkers[i];
 
-		OscMessageInitialise(&msg, (str_addr + "/xyz").c_str());
-		OscMessageAddFloat32(&msg, pos[0]);
-		OscMessageAddFloat32(&msg, pos[1]);
-		OscMessageAddFloat32(&msg, pos[2]);
-		OscBundleAddContents(&bndl, &msg);
-
+		OscMessageAddFloat32(&m_x, pos[0] * g_unitConversion);
+		OscMessageAddFloat32(&m_y, pos[1] * g_unitConversion);
+		OscMessageAddFloat32(&m_z, pos[2] * g_unitConversion);
 	}
+
+	OscBundleAddContents(&bndl, &m_x);
+	OscBundleAddContents(&bndl, &m_y);
+	OscBundleAddContents(&bndl, &m_z);
 	*/
 
 	/*
@@ -873,7 +909,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		}
 	}
 	*/
-	sendOSC(&bndl);
+	sendOSC(bndl);
 
 }
 
@@ -929,11 +965,11 @@ void resetClient()
 }
 
 
-bool sendOSC(const void* osc)
+bool sendOSC(const OscBundle& osc)
 {
 	// Create OSC packet from OSC message or OSC bundle
 	OscPacket oscPacket;
-	if (OscPacketInitialiseFromContents(&oscPacket, osc) != OscErrorNone) {
+	if (OscPacketInitialiseFromContents(&oscPacket, &osc) != OscErrorNone) {
 		return 0; // error: unable to create an OSC packet from the OSC contents
 	}
 

@@ -1,13 +1,22 @@
-﻿  optitrackOSC.cpp
+﻿  OscAddress.c
+  OscBundle.c
+  OscCommon.c
+  OscError.c
+  OscMessage.c
+  OscPacket.c
+  OscSlip.c
+C:\Users\innolab\Documents\GitHub\OSC99\Osc99\OscMessage.c(1043,49): warning C4018: '<': signed/unsigned mismatch
+  NatUtils_hfmt.cpp
+  optitrackOSC.cpp
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(168,24): warning C4101: 'm_z': unreferenced local variable
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(167,13): warning C4101: 'bndl': unreferenced local variable
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(677,39): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(678,41): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(679,37): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(609,14): warning C4101: 'ea': unreferenced local variable
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(940,65): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(967,24): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1040,38): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(938,65): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(965,24): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1038,38): warning C4305: 'initializing': truncation from 'double' to 'float'
   Generating code
   1 of 277 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
