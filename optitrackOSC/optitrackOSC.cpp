@@ -85,8 +85,10 @@ std::unordered_map<int, std::string> g_rigidBodyNames, g_markerNames;
 typedef std::chrono::high_resolution_clock chrono_clock;
 typedef std::chrono::duration<float, std::milli> duration_t;
 
-// modelID_markerID : number of frames
+// modelID_markerID : duration of marker
 std::unordered_map<std::string, std::chrono::steady_clock::time_point > g_model_marker_id_frames;
+std::unordered_map<std::string, std::vector<double> > g_prev_marker_xyz;
+
 
 // Used for converting NatNet data to the proper units.
 float g_unitConversion = 1.0f;
@@ -754,10 +756,16 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	//OscMessageAddInt32(&msg, data->nLabeledMarkers);
 	//OscBundleAddContents(&bndl, &msg);
 
-	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size, m_duration;
+	OscMessage m_active, m_labeled, m_occ, m_pc, m_model, m_modID, m_marID, m_size, m_duration, m_dx, m_dy, m_dz, m_moved_dist;
 	OscMessageInitialise(&m_x, "/marker/x");
 	OscMessageInitialise(&m_y, "/marker/y");
 	OscMessageInitialise(&m_z, "/marker/z");
+
+	OscMessageInitialise(&m_dx, "/marker/dx");
+	OscMessageInitialise(&m_dy, "/marker/dy");
+	OscMessageInitialise(&m_dz, "/marker/dz");
+
+	OscMessageInitialise(&m_moved_dist, "/marker/moved/dist");
 
 	OscMessageInitialise(&m_labeled, "/marker/labeled");
 	OscMessageInitialise(&m_active, "/marker/active");
@@ -773,10 +781,20 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 
 
 	auto prev = g_model_marker_id_frames;
+	auto prev_xyz = g_prev_marker_xyz;
 
 	for (i = 0; i < data->nLabeledMarkers; i++)
 	{
 		sMarker marker = data->LabeledMarkers[i];
+
+		double x, y, z;
+		x = marker.x * g_unitConversion;
+		y = marker.y * g_unitConversion;
+		z = marker.z * g_unitConversion;
+
+		OscMessageAddFloat32(&m_x, x);
+		OscMessageAddFloat32(&m_y, y);
+		OscMessageAddFloat32(&m_z, z);
 
 		bOccluded = ((marker.params & 0x01) != 0);
 		bPCSolved = ((marker.params & 0x02) != 0);
@@ -795,13 +813,32 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		{
 			g_model_marker_id_frames[model_marker_id] = chrono_clock::now();
 			OscMessageAddInt32(&m_duration, 0);
+
+			OscMessageAddFloat32(&m_dx, 0);
+			OscMessageAddFloat32(&m_dy, 0);
+			OscMessageAddFloat32(&m_dz, 0);
+			OscMessageAddFloat32(&m_moved_dist, 0);
+
+			g_prev_marker_xyz[model_marker_id] = { x,y,z };
 		}
 		else
 		{
 			duration_t dur = chrono_clock::now() - g_model_marker_id_frames[model_marker_id];
 			OscMessageAddFloat32(&m_duration, dur.count() * 0.001 );
 
+			double dx = x - g_prev_marker_xyz[model_marker_id][0];
+			double dy = y - g_prev_marker_xyz[model_marker_id][1];
+			double dz = z - g_prev_marker_xyz[model_marker_id][2];
+
+			OscMessageAddFloat32(&m_dx, dx);
+			OscMessageAddFloat32(&m_dy, dy);
+			OscMessageAddFloat32(&m_dz, dz);
+			OscMessageAddFloat32(&m_moved_dist, sqrt(dx*dx + dy*dy + dz*dz));
+
+			g_prev_marker_xyz[model_marker_id] = { x,y,z };
+
 			prev.erase(model_marker_id);
+			prev_xyz.erase(model_marker_id);
 		}
 
 
@@ -814,9 +851,7 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddInt32(&m_marID, markerID);
 		OscMessageAddFloat32(&m_size, marker.size);
 
-		OscMessageAddFloat32(&m_x, marker.x * g_unitConversion);
-		OscMessageAddFloat32(&m_y, marker.y * g_unitConversion);
-		OscMessageAddFloat32(&m_z, marker.z * g_unitConversion);
+		
 		
 
 
@@ -830,11 +865,19 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 	for (const auto& p : prev)
 	{
 		g_model_marker_id_frames.erase(p.first);
+		g_prev_marker_xyz.erase(p.first);
 	}
 
 	OscBundleAddContents(&bndl, &m_x);
 	OscBundleAddContents(&bndl, &m_y);
 	OscBundleAddContents(&bndl, &m_z);
+	
+	OscBundleAddContents(&bndl, &m_dx);
+	OscBundleAddContents(&bndl, &m_dy);
+	OscBundleAddContents(&bndl, &m_dz);
+
+	OscBundleAddContents(&bndl, &m_moved_dist);
+
 	OscBundleAddContents(&bndl, &m_active);
 	OscBundleAddContents(&bndl, &m_labeled);
 	OscBundleAddContents(&bndl, &m_occ);
