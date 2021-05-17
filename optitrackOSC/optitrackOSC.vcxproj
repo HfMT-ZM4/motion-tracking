@@ -112,7 +112,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\OSC99\OSC99;$(SolutionDir)..\..\NatNetSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\map-osc\src;$(SolutionDir)..\..\NatNetSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,7 +161,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\OSC99\OSC99;$(SolutionDir)..\..\NatNetSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\map-osc\src;$(SolutionDir)..\..\NatNetSDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -175,25 +177,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\OSC99\Osc99\OscAddress.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscBundle.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscCommon.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscError.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscMessage.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscPacket.c" />
-    <ClCompile Include="..\..\OSC99\Osc99\OscSlip.c" />
+    <ClCompile Include="..\..\map-osc\src\OSCMap.cpp" />
     <ClCompile Include="NatUtils_hfmt.cpp" />
     <ClCompile Include="optitrackOSC.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\OSC99\Osc99\Osc99.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscAddress.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscBundle.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscCommon.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscError.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscMessage.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscPacket.h" />
-    <ClInclude Include="..\..\OSC99\Osc99\OscSlip.h" />
+    <ClInclude Include="..\..\map-osc\src\OSCMap.hpp" />
     <ClInclude Include="NATUtils_hfmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

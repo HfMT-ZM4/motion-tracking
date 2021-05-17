@@ -13,68 +13,23 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\osc99">
-      <UniqueIdentifier>{e463697c-4b06-4416-913a-74b5dc4dd44d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\osc99">
-      <UniqueIdentifier>{7cfffa4c-c3d0-49b8-a613-c95480f828cf}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="optitrackOSC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscAddress.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscBundle.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscCommon.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscError.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscMessage.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscPacket.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\OSC99\Osc99\OscSlip.c">
-      <Filter>Source Files\osc99</Filter>
-    </ClCompile>
     <ClCompile Include="NatUtils_hfmt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\map-osc\src\OSCMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\OSC99\Osc99\Osc99.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscAddress.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscBundle.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscCommon.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscError.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscMessage.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscPacket.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\OSC99\Osc99\OscSlip.h">
-      <Filter>Header Files\osc99</Filter>
-    </ClInclude>
     <ClInclude Include="NATUtils_hfmt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\map-osc\src\OSCMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

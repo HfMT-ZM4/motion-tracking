@@ -1,0 +1,2 @@
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\Debug\optitrackOSC.exe
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\Debug\optitrackOSC.pdb

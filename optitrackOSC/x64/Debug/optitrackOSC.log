@@ -1,10 +1,15 @@
-﻿  optitrackOSC.cpp
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(85,4): warning C4267:  'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(110,24): warning C4244:  '=': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(97,7): warning C4101:  'message': unreferenced local variable
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(96,7): warning C4101:  'buf': unreferenced local variable
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(693,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(705,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
-C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(714,30): warning C4244:  'argument': conversion from 'double' to 'const float', possible loss of data
+﻿  OSCMap.cpp
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(182,1): warning C4099: "OSCMap": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(181): message : Siehe Deklaration von "OSCMap"
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.cpp(403,27): warning C4267: "+=": Konvertierung von "size_t" nach "long", Datenverlust möglich
+  NatUtils_hfmt.cpp
+  optitrackOSC.cpp
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(182,1): warning C4099: "OSCMap": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(181): message : Siehe Deklaration von "OSCMap"
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(610,14): warning C4101: "ea": Unreferenzierte lokale Variable
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1069,67): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1096,24): warning C4244: "=": Konvertierung von "SOCKET" in "int", möglicher Datenverlust
+C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1169,38): warning C4305: "Initialisierung": Verkürzung von "double" in "float"
+  Code wird generiert...
   optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Debug\optitrackOSC.exe
   0 File(s) copied
