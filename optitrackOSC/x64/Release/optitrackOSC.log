@@ -1,18 +1,14 @@
-﻿  OSCMap.cpp
-C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(182,1): warning C4099: "OSCMap": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
-C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(181): message : Siehe Deklaration von "OSCMap"
-C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.cpp(403,27): warning C4267: "+=": Konvertierung von "size_t" nach "long", Datenverlust möglich
-  NatUtils_hfmt.cpp
-  optitrackOSC.cpp
-C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(182,1): warning C4099: "OSCMap": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
-C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(181): message : Siehe Deklaration von "OSCMap"
+﻿  optitrackOSC.cpp
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(181,1): warning C4099: "OSCMap": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\innolab\Documents\GitHub\map-osc\src\OSCMap.hpp(180): message : Siehe Deklaration von "OSCMap"
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(610,14): warning C4101: "ea": Unreferenzierte lokale Variable
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1069,67): warning C4267: "Argument": Konvertierung von "size_t" nach "int", Datenverlust möglich
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1096,24): warning C4244: "=": Konvertierung von "SOCKET" in "int", möglicher Datenverlust
 C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\optitrackOSC.cpp(1169,38): warning C4305: "Initialisierung": Verkürzung von "double" in "float"
   Code wird generiert.
-  Previous IPDB not found, fall back to full compilation.
-  All 1056 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  311 of 1049 functions (29.6%) were compiled, the rest were copied from previous compilation.
+    149 functions were new in current compilation
+    70 functions had inline decision re-evaluated but remain unchanged
   Codegenerierung ist abgeschlossen.
   optitrackOSC.vcxproj -> C:\Users\innolab\Documents\GitHub\motion-tracking\optitrackOSC\x64\Release\optitrackOSC.exe
   0 File(s) copied

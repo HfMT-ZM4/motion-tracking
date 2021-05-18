@@ -622,14 +622,14 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			ConvertRHSRotZUpToYUp(_rb.qx, _rb.qy, _rb.qz, _rb.qw);
 		}
 		*/
-		o_bundle["/rigidBody/x"]->appendValue(_rb.x * g_unitConversion);
-		o_bundle["/rigidBody/y"]->appendValue(_rb.y * g_unitConversion);
-		o_bundle["/rigidBody/z"]->appendValue(_rb.z * g_unitConversion);
+		o_bundle["/rigidBody/x"].appendValue(_rb.x * g_unitConversion);
+		o_bundle["/rigidBody/y"].appendValue(_rb.y * g_unitConversion);
+		o_bundle["/rigidBody/z"].appendValue(_rb.z * g_unitConversion);
 
-		o_bundle["/rigidBody/qx"]->appendValue(_rb.qx);
-		o_bundle["/rigidBody/qy"]->appendValue(_rb.qy);
-		o_bundle["/rigidBody/qz"]->appendValue(_rb.qz);
-		o_bundle["/rigidBody/qw"]->appendValue(_rb.qw);
+		o_bundle["/rigidBody/qx"].appendValue(_rb.qx);
+		o_bundle["/rigidBody/qy"].appendValue(_rb.qy);
+		o_bundle["/rigidBody/qz"].appendValue(_rb.qz);
+		o_bundle["/rigidBody/qw"].appendValue(_rb.qw);
 
 
 		/*
@@ -675,19 +675,19 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		float yaw = atan2(siny_cosp, cosy_cosp);
 		*/
 
-		o_bundle["/rigidBody/yaw"]->appendValue(yaw2 * radtodeg);
-		o_bundle["/rigidBody/pitch"]->appendValue(pitch2 * radtodeg);
-		o_bundle["/rigidBody/roll"]->appendValue(roll2 * radtodeg);
+		o_bundle["/rigidBody/yaw"].appendValue(yaw2 * radtodeg);
+		o_bundle["/rigidBody/pitch"].appendValue(pitch2 * radtodeg);
+		o_bundle["/rigidBody/roll"].appendValue(roll2 * radtodeg);
 
-		o_bundle["/rigidBody/id"]->appendValue(_rb.ID);
-		o_bundle["/rigidBody/name"]->appendValue(g_rigidBodyNames[rb_prefix + std::to_string(_rb.ID)].c_str());
-		o_bundle["/rigidBody/meanError"]->appendValue(_rb.MeanError);
+		o_bundle["/rigidBody/id"].appendValue(_rb.ID);
+		o_bundle["/rigidBody/name"].appendValue(g_rigidBodyNames[rb_prefix + std::to_string(_rb.ID)].c_str());
+		o_bundle["/rigidBody/meanError"].appendValue(_rb.MeanError);
 
 
 		// params
 		// 0x01 : bool, rigid body was successfully tracked in this frame
 		bool bTrackingValid = _rb.params & 0x01;
-		o_bundle["/rigidBody/validTracking"]->appendValue(bTrackingValid);
+		o_bundle["/rigidBody/validTracking"].appendValue(bTrackingValid);
 
 
 		/*
@@ -738,13 +738,13 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		{
 			sRigidBodyData _rb = skData.RigidBodyData[j];
 
-			skel_bundle["/x"]->appendValue(_rb.x* g_unitConversion);
-			skel_bundle["/y"]->appendValue(_rb.y* g_unitConversion);
-			skel_bundle["/z"]->appendValue(_rb.z* g_unitConversion);
-			skel_bundle["/qx"]->appendValue(_rb.qx);
-			skel_bundle["/qy"]->appendValue(_rb.qy);
-			skel_bundle["/qz"]->appendValue(_rb.qz);
-			skel_bundle["/qw"]->appendValue(_rb.qw);
+			skel_bundle["/x"].appendValue(_rb.x* g_unitConversion);
+			skel_bundle["/y"].appendValue(_rb.y* g_unitConversion);
+			skel_bundle["/z"].appendValue(_rb.z* g_unitConversion);
+			skel_bundle["/qx"].appendValue(_rb.qx);
+			skel_bundle["/qy"].appendValue(_rb.qy);
+			skel_bundle["/qz"].appendValue(_rb.qz);
+			skel_bundle["/qw"].appendValue(_rb.qw);
 
 			// flety version
 			float q1 = _rb.qw;
@@ -756,19 +756,19 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			float pitch2 = -asin(2.0f * ((q2 * q4) - (q1 * q3)));
 			float roll2 = atan2(2.0f * (q1 * q2 + q3 * q4), (q1 * q1) - (q2 * q2) - (q3 * q3) + (q4 * q4));
 
-			skel_bundle["/roll"]->appendValue(roll2* radtodeg);
-			skel_bundle["/pitch"]->appendValue(pitch2* radtodeg);
-			skel_bundle["/yaw"]->appendValue(yaw2* radtodeg);
+			skel_bundle["/roll"].appendValue(roll2* radtodeg);
+			skel_bundle["/pitch"].appendValue(pitch2* radtodeg);
+			skel_bundle["/yaw"].appendValue(yaw2* radtodeg);
 
-			skel_bundle["/id"]->appendValue(_rb.ID);
-			skel_bundle["/name"]->appendValue(g_rigidBodyNames[ skel_rb_prefix + std::to_string(_rb.ID) ].c_str());
+			skel_bundle["/id"].appendValue(_rb.ID);
+			skel_bundle["/name"].appendValue(g_rigidBodyNames[ skel_rb_prefix + std::to_string(_rb.ID) ].c_str());
 
-			skel_bundle["/meanError"]->appendValue(_rb.MeanError);
+			skel_bundle["/meanError"].appendValue(_rb.MeanError);
 
 			// params
 			// 0x01 : bool, rigid body was successfully tracked in this frame
 			bool bTrackingValid = _rb.params & 0x01;
-			skel_bundle["/validTracking"]->appendValue(bTrackingValid);
+			skel_bundle["/validTracking"].appendValue(bTrackingValid);
 			//int modelID, markerID;
 
 			//NatNet_DecodeID(rbData.ID, &modelID, &markerID);
@@ -833,9 +833,9 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		y = marker.y * g_unitConversion;
 		z = marker.z * g_unitConversion;
 
-		o_bundle["/marker/x"]->appendValue(x);
-		o_bundle["/marker/y"]->appendValue(y);
-		o_bundle["/marker/z"]->appendValue(z);
+		o_bundle["/marker/x"].appendValue(x);
+		o_bundle["/marker/y"].appendValue(y);
+		o_bundle["/marker/z"].appendValue(z);
 
 
 		bOccluded = ((marker.params & 0x01) != 0);
@@ -855,11 +855,11 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		{
 			g_model_marker_id_frames[model_marker_id] = chrono_clock::now();
 
-			o_bundle["/marker/dur"]->appendValue(0);
-			o_bundle["/marker/dx"]->appendValue(0);
-			o_bundle["/marker/dy"]->appendValue(0);
-			o_bundle["/marker/dz"]->appendValue(0);
-			o_bundle["/marker/moved/dist"]->appendValue(0);
+			o_bundle["/marker/dur"].appendValue(0);
+			o_bundle["/marker/dx"].appendValue(0);
+			o_bundle["/marker/dy"].appendValue(0);
+			o_bundle["/marker/dz"].appendValue(0);
+			o_bundle["/marker/moved/dist"].appendValue(0);
 
 			g_prev_marker_xyz[model_marker_id] = { x,y,z };
 		}
@@ -872,11 +872,11 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 			double dy = y - g_prev_marker_xyz[model_marker_id][1];
 			double dz = z - g_prev_marker_xyz[model_marker_id][2];
 
-			o_bundle["/marker/dur"]->appendValue(dur.count() * 0.001);
-			o_bundle["/marker/dx"]->appendValue(dx);
-			o_bundle["/marker/dy"]->appendValue(dy);
-			o_bundle["/marker/dz"]->appendValue(dz);
-			o_bundle["/marker/moved/dist"]->appendValue(sqrt(dx * dx + dy * dy + dz * dz));
+			o_bundle["/marker/dur"].appendValue(dur.count() * 0.001);
+			o_bundle["/marker/dx"].appendValue(dx);
+			o_bundle["/marker/dy"].appendValue(dy);
+			o_bundle["/marker/dz"].appendValue(dz);
+			o_bundle["/marker/moved/dist"].appendValue(sqrt(dx * dx + dy * dy + dz * dz));
 
 
 			g_prev_marker_xyz[model_marker_id] = { x,y,z };
@@ -896,15 +896,15 @@ void NATNET_CALLCONV DataHandler(sFrameOfMocapData* data, void* pUserData)
 		OscMessageAddFloat32(&m_size, marker.size);
 		*/
 
-		o_bundle["/marker/labeled"]->appendValue(!bUnlabeled);
-		o_bundle["/marker/active"]->appendValue(bActiveMarker);
-		o_bundle["/marker/occulded"]->appendValue(bOccluded);
-		o_bundle["/marker/solved/pc"]->appendValue(bPCSolved);
-		o_bundle["/marker/solved/model"]->appendValue(bModelSolved);
+		o_bundle["/marker/labeled"].appendValue(!bUnlabeled);
+		o_bundle["/marker/active"].appendValue(bActiveMarker);
+		o_bundle["/marker/occulded"].appendValue(bOccluded);
+		o_bundle["/marker/solved/pc"].appendValue(bPCSolved);
+		o_bundle["/marker/solved/model"].appendValue(bModelSolved);
 
-		o_bundle["/marker/modelID"]->appendValue(modelID);
-		o_bundle["/marker/markerID"]->appendValue(markerID);
-		o_bundle["/marker/size"]->appendValue(marker.size);
+		o_bundle["/marker/modelID"].appendValue(modelID);
+		o_bundle["/marker/markerID"].appendValue(markerID);
+		o_bundle["/marker/size"].appendValue(marker.size);
 
 
 		/*
